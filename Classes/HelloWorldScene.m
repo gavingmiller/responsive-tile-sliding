@@ -18,6 +18,14 @@
 #define CAT_LAYER    5
 #define LABEL_LAYER  6
 
+#define TOUCH_THRESHOLD 20
+#define DIFFERENCE_THRESHOLD 100
+#define SLIDE_UP    1
+#define SLIDE_RIGHT 2
+#define SLIDE_DOWN  3
+#define SLIDE_LEFT  4
+#define NO_TOUCH    0
+
 @implementation HelloWorld
 
 +(id) scene {
@@ -127,18 +135,10 @@
 }
 
 -(void) ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	CCLOG(@"ccTouchesBegan");
-	
 	// Choose one of the touches to work with
 	UITouch *touch = [touches anyObject];
 	CGPoint location = [touch locationInView:[touch view]];
-	location = [[CCDirector sharedDirector] convertToGL:location];
-	
-	// Detect which SpriteTile was touched
-	SpriteTile *sprite = nil;
-	if ( (sprite = [self wasSpriteTouched:location]) != nil) {
-		startTouchTile = sprite;
-	}
+	startTouch = [[CCDirector sharedDirector] convertToGL:location];
 }
 
 -(void) ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -149,15 +149,18 @@
 	// Choose one of the touches to work with
 	UITouch *touch = [touches anyObject];
 	CGPoint location = [touch locationInView:[touch view]];
-	location = [[CCDirector sharedDirector] convertToGL:location];
+	CGPoint endTouch = [[CCDirector sharedDirector] convertToGL:location];
 	
-	// Detect which SpriteTile was touched
-	SpriteTile *sprite = nil;
-	if ( (sprite = [self wasSpriteTouched:location]) != nil) {
+	int touchDirection = [self getTouchDirectionFrom:startTouch to:endTouch];
+	
+	if (touchDirection == NO_TOUCH) {
+		return;
+	}
+	
+	SpriteTile *sprite = [self getSpriteToMoveInDirection:touchDirection];
+	
+	if (sprite != nil) {
 		[self performTileMovementSequence:sprite];
-	} else if ([self wasOpenSquareTouched:location]) {
-		CCLOG(@"Open square touch ended.");
-		[self performTileMovementSequence:startTouchTile];
 	}
 }
 
@@ -190,6 +193,94 @@
 	}
 	
 	return nil;
+}
+
+-(SpriteTile *) getSpriteToMoveInDirection:(int)touchDirection {	
+	int position = 0;
+	int i = 0;
+	int j = 0;
+	
+	switch (touchDirection) {
+		case SLIDE_UP:
+			position = openSquare + 1;
+			CCLOG(@"position: %d", position);
+			if (position != 4 && position != 8 && position != 12 && 0 <= position && position <= 15) {
+				i = [(NSNumber *)[is objectAtIndex:position] intValue];
+				j = [(NSNumber *)[js objectAtIndex:position] intValue];
+				
+				CGPoint point = [SpriteTile calculatePosition:i j:j];
+				return [self wasSpriteTouched:point];
+			}
+			break;
+		case SLIDE_RIGHT:
+			position = openSquare - 4;
+			CCLOG(@"position: %d", position);
+			if (0 <= position && position <= 15 ) {
+				i = [(NSNumber *)[is objectAtIndex:position] intValue];
+				j = [(NSNumber *)[js objectAtIndex:position] intValue];
+				
+				CGPoint point = [SpriteTile calculatePosition:i j:j];
+				return [self wasSpriteTouched:point];				
+			}
+			break;
+		case SLIDE_DOWN:
+			position = openSquare - 1;
+			CCLOG(@"position: %d", position);
+			if (position != 3 && position != 7 && position != 11 && 0 <= position && position <= 15) {
+				i = [(NSNumber *)[is objectAtIndex:position] intValue];
+				j = [(NSNumber *)[js objectAtIndex:position] intValue];
+				
+				CGPoint point = [SpriteTile calculatePosition:i j:j];
+				return [self wasSpriteTouched:point];
+			}
+			break;
+		case SLIDE_LEFT:
+			position = openSquare + 4;
+			CCLOG(@"position: %d", position);
+			if (0 <= position && position <= 15) {
+				i = [(NSNumber *)[is objectAtIndex:position] intValue];
+				j = [(NSNumber *)[js objectAtIndex:position] intValue];
+				
+				CGPoint point = [SpriteTile calculatePosition:i j:j];
+				return [self wasSpriteTouched:point];
+			}
+			break;
+	}
+	
+	return nil;
+}
+
+-(int) getTouchDirectionFrom:(CGPoint)start to:(CGPoint)end {
+	int leftToRight = start.x - end.x;
+	int bottomToTop = start.y - end.y;
+	
+	if (abs(leftToRight) > DIFFERENCE_THRESHOLD && abs(bottomToTop) > DIFFERENCE_THRESHOLD) {
+		return NO_TOUCH;
+	}
+	
+	if (abs(leftToRight) > abs(bottomToTop)) {
+		if (abs(leftToRight) < TOUCH_THRESHOLD) {
+			return NO_TOUCH;
+		}
+		
+		// Take left to right motion
+		if (leftToRight > 0) {
+			return SLIDE_LEFT;
+		} else {
+			return SLIDE_RIGHT;
+		}
+	} else {
+		if (abs(bottomToTop) < TOUCH_THRESHOLD) {
+			return NO_TOUCH;
+		}
+		
+		// Take bottom to top motion
+		if (bottomToTop > 0) {
+			return SLIDE_DOWN;
+		} else {
+			return SLIDE_UP;
+		}		
+	}
 }
 
 -(BOOL) wasOpenSquareTouched:(CGPoint) location {
