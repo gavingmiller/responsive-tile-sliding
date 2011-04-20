@@ -1,0 +1,16 @@
+//
+// Prefix header for all source files of the 'responsive-touch' target in the 'responsive-touch' project
+//
+
+#ifdef __OBJC__
+	#import <Foundation/Foundation.h>
+	#import <UIKit/UIKit.h>
+#endif
+
+#define SPRITE_TILE_SIZE	75
+#define SPRITE_TILE_RADIUS	37
+
+#define LEVEL_TILE_SIZE		65
+#define LEVEL_TILE_RADIUS	35
+
+#define FONT				@"Arial Rounded MT Bold"
