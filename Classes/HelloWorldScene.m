@@ -126,10 +126,8 @@
 	}
 }
 
--(void) ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	if (!canMove) {
-		return;
-	}
+-(void) ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	CCLOG(@"ccTouchesBegan");
 	
 	// Choose one of the touches to work with
 	UITouch *touch = [touches anyObject];
@@ -139,10 +137,38 @@
 	// Detect which SpriteTile was touched
 	SpriteTile *sprite = nil;
 	if ( (sprite = [self wasSpriteTouched:location]) != nil) {
-		if ([self canSpriteOccupyOpenSquare:sprite]) {
-			[self moveTileToOpenSquare:sprite duration:0.12];
-		}
+		startTouchTile = sprite;
 	}
+}
+
+-(void) ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	if (!canMove) {
+		return;
+	}
+
+	// Choose one of the touches to work with
+	UITouch *touch = [touches anyObject];
+	CGPoint location = [touch locationInView:[touch view]];
+	location = [[CCDirector sharedDirector] convertToGL:location];
+	
+	// Detect which SpriteTile was touched
+	SpriteTile *sprite = nil;
+	if ( (sprite = [self wasSpriteTouched:location]) != nil) {
+		[self performTileMovementSequence:sprite];
+	} else if ([self wasOpenSquareTouched:location]) {
+		CCLOG(@"Open square touch ended.");
+		[self performTileMovementSequence:startTouchTile];
+	}
+}
+
+-(void) performTileMovementSequence:(SpriteTile *)sprite {
+	if (sprite == nil) {
+		return;
+	}
+	
+	if ([self canSpriteOccupyOpenSquare:sprite]) {
+		[self moveTileToOpenSquare:sprite duration:0.12];
+	}	
 }
 
 -(SpriteTile *) getSpriteAtPosition:(int) position {
@@ -164,6 +190,14 @@
 	}
 	
 	return nil;
+}
+
+-(BOOL) wasOpenSquareTouched:(CGPoint) location {
+	int i = [(NSNumber *)[is objectAtIndex:openSquare] intValue];
+	int j = [(NSNumber *)[js objectAtIndex:openSquare] intValue];
+	
+	CGPoint point = [SpriteTile calculatePosition:i j:j];
+	return [SpriteTile isLocationTouching:location tile:point];
 }
 
 -(BOOL) canSpriteOccupyOpenSquare:(SpriteTile *) sprite {

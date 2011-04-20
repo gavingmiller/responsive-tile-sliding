@@ -1,7 +1,0 @@
-/Users/gavinmiller/GitHub/responsive-touch/responsive-touch/Classes/SpriteTile.m: In function '+[SpriteTile isLocationTouching:tile:]':
-/Users/gavinmiller/GitHub/responsive-touch/responsive-touch/Classes/SpriteTile.m:33: error: 'SPRITE_TILE_RADIUS' undeclared (first use in this function)
-/Users/gavinmiller/GitHub/responsive-touch/responsive-touch/Classes/SpriteTile.m:33: error: (Each undeclared identifier is reported only once
-/Users/gavinmiller/GitHub/responsive-touch/responsive-touch/Classes/SpriteTile.m:33: error: for each function it appears in.)
-/Users/gavinmiller/GitHub/responsive-touch/responsive-touch/Classes/SpriteTile.m: In function '+[SpriteTile calculatePosition:j:]':
-/Users/gavinmiller/GitHub/responsive-touch/responsive-touch/Classes/SpriteTile.m:51: error: 'SPRITE_TILE_RADIUS' undeclared (first use in this function)
-/Users/gavinmiller/GitHub/responsive-touch/responsive-touch/Classes/SpriteTile.m:51: error: 'SPRITE_TILE_SIZE' undeclared (first use in this function)

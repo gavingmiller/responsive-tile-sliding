@@ -18,6 +18,7 @@
 	NSMutableArray *is;
 	NSMutableArray *js;
 	
+	SpriteTile *startTouchTile;
 	CCLabelTTF *time;
 	CCLabelTTF *moves;
 	int numMoves;
@@ -39,9 +40,12 @@
 
 -(SpriteTile *) getSpriteAtPosition:(int) position;
 -(SpriteTile *) wasSpriteTouched:(CGPoint) location;
+-(BOOL) wasOpenSquareTouched:(CGPoint) location;
 
 -(BOOL) canSpriteOccupyOpenSquare:(SpriteTile *) sprite;
 -(void) moveTileToOpenSquare:(SpriteTile *)tile duration:(ccTime)duration;
+
+-(void) performTileMovementSequence:(SpriteTile *)sprite;
 
 +(id) scene;
 
